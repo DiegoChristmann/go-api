@@ -72,6 +72,7 @@ go run cmd/main.go
 - **GET** `/products` - Lista todos os produtos
 - **GET** `/product/:productId` - Busca um produto por ID
 - **POST** `/product` - Cria um novo produto
+- **DELETE** `/product/:productId` - Deleta o produto com o ID enviado
 
 #### Exemplo de criação de produto:
 ```json
