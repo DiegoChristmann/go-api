@@ -5,31 +5,41 @@ import (
 	"go-api/usecase"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-type productController struct {
+type ProductController struct {
 	productUsecase usecase.ProductUsecase
 }
 
-func NewProductController(usecase usecase.ProductUsecase) productController {
-	return productController{
+func NewProductController(usecase usecase.ProductUsecase) *ProductController {
+	return &ProductController{
 		productUsecase: usecase,
 	}
 }
 
-func (p *productController) GetProducts(ctx *gin.Context) {
-
+func (p *ProductController) GetProducts(ctx *gin.Context) {
 	products, err := p.productUsecase.GetProducts()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		response := model.Response{
+			Message: "Erro ao buscar produtos: " + err.Error(),
+		}
+		ctx.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	// Garantir que sempre retorne um array vazio se não houver produtos
+	// Isso evita retornar null
+	if products == nil {
+		products = []model.Product{}
 	}
 
 	ctx.JSON(http.StatusOK, products)
 }
 
-func (p *productController) CreateProduct(ctx *gin.Context) {
+func (p *ProductController) CreateProduct(ctx *gin.Context) {
 
 	var product model.Product
 	err := ctx.BindJSON(&product)
@@ -48,7 +58,7 @@ func (p *productController) CreateProduct(ctx *gin.Context) {
 
 }
 
-func (p *productController) GetProductById(ctx *gin.Context) {
+func (p *ProductController) GetProductById(ctx *gin.Context) {
 
 	id := ctx.Param("productId")
 	if id == "" {
@@ -83,4 +93,46 @@ func (p *productController) GetProductById(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, product)
+}
+
+func (p *ProductController) DeleteProduct(ctx *gin.Context) {
+	id := ctx.Param("productId")
+	if id == "" {
+		response := model.Response{
+			Message: "ID do produto não pode ser nulo",
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		response := model.Response{
+			Message: "ID do produto precisa ser um número",
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	err = p.productUsecase.DeleteProduct(productId)
+	if err != nil {
+		// Verifica se é erro de produto não encontrado
+		if strings.Contains(err.Error(), "não encontrado") {
+			response := model.Response{
+				Message: err.Error(),
+			}
+			ctx.JSON(http.StatusNotFound, response)
+			return
+		}
+		response := model.Response{
+			Message: "Erro ao deletar produto: " + err.Error(),
+		}
+		ctx.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	response := model.Response{
+		Message: "Produto deletado com sucesso",
+	}
+	ctx.JSON(http.StatusOK, response)
 }
