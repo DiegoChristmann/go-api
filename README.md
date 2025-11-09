@@ -1,4 +1,6 @@
-# API Go - Gerenciamento de Produtos
+# go-api
+
+API de consulta e cadastro de produtos em banco PostgreSQL, com uso de containers Docker
 
 API REST desenvolvida em Go (Gin) para gerenciamento de produtos com arquitetura em camadas (Controller, UseCase, Repository).
 
@@ -32,8 +34,8 @@ API REST desenvolvida em Go (Gin) para gerenciamento de produtos com arquitetura
 
 1. Clone o repositório:
 ```bash
-git clone <seu-repositorio>
-cd API1
+git clone https://github.com/DiegoChristmann/go-api.git
+cd go-api
 ```
 
 2. Execute com Docker Compose:
@@ -171,9 +173,8 @@ Este projeto está sob a licença MIT.
 
 ## 👤 Autor
 
-Seu Nome
+Diego Christmann
 
 ---
 
 Desenvolvido com ❤️ usando Go
-
